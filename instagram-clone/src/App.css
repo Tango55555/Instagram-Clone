@@ -12,3 +12,12 @@
   border-bottom: 1px solid lightgray;
   object-fit: contain;
 }
+
+.app_headerImage {
+  max-width: 2.5%;
+}
+
+.app_signup {
+  display: flex;
+  flex-direction: column;
+}
