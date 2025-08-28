@@ -6,6 +6,8 @@ import { db, auth } from './firebase';
 import Modal from "@mui/material/Modal";
 import Button from '@mui/material/Button';
 import Input from '@mui/material/Input';
+import ImageUpload from "./ImageUpload";
+import { InstagramEmbed } from 'react-social-media-embed';
 
 const modalStyle = {
   position: 'absolute',
@@ -45,7 +47,7 @@ function App() {
   }, [user, username]);
 
   useEffect (() => {
-    db.collection('posts').onSnapshot(snapshot => {
+    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
       setPosts(snapshot.docs.map(doc => ({
         id: doc.id,
         post: doc.data()
@@ -80,6 +82,7 @@ function App() {
 
   return (
     <div className="App">
+
       <Modal
        open={open}
        onClose={() => setOpen(false)}
@@ -148,22 +151,38 @@ function App() {
           src={logo}
           alt='Logo'
         />
+
+        {user ? (
+          <Button onClick={() => auth.signOut()}>Log Out</Button>
+        ): (
+          <div className="app_loginContainer">
+          <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
+          <Button onClick={() => setOpen(true)}>Sign Up</Button>
+          </div>
+        )}
       </div>
 
-      {user ? (
-        <Button onClick={() => auth.signOut()}>Log Out</Button>
-      ): (
-        <div className="app_loginContainer">
-        <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
-        <Button onClick={() => setOpen(true)}>Sign Up</Button>
+      <div className="app_posts">
+        <div className="app_postsLeft">
+          {
+            posts.map(({id, post}) => (
+              <Post key={id} postId={id} user={user} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
+            ))
+          }
         </div>
-      )}
 
-      {
-        posts.map(({id, post}) => (
-          <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
-        ))
-      }
+        <div className="app_postsRight">
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <InstagramEmbed url="https://www.instagram.com/p/CUbHfhpswxt/" width={328} captioned />
+          </div>
+        </div>
+      </div>
+
+      {user?.displayName ? (
+        <ImageUpload username={user.displayName}/>
+      ): (
+        <h3>You need to login to upload</h3>
+      )}
     </div>
   );
 }
